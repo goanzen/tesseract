@@ -1362,6 +1362,9 @@ std::vector<TesseractTableInfo> TessBaseAPI::GetTables() {
   }
 
   for (auto tablePtr: *tables_) {
+    if (tablePtr == nullptr) {
+      continue;
+    }
     auto table = *tablePtr;
     auto cols = table.getCols();
     auto rows = table.getRows();
@@ -2173,6 +2176,7 @@ int TessBaseAPI::FindLines() {
   // If Devanagari is being recognized, we use different images for page seg
   // and for OCR.
   tesseract_->PrepareForTessOCR(block_list_, osd_tess, &osr);
+
   return 0;
 }
 
