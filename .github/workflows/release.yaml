@@ -42,11 +42,13 @@ jobs:
           ../configure --disable-openmp --prefix=$(realpath ../build-out)
           make && make install
           cd ..
+      - name: Package output
+        runs: tar -czvf anzen-tesseract-macos-amd64.tar.gz -C build-out .
       - name: Save output
         uses: actions/upload-artifact@v4
         with:
           name: anzen-tesseract-macos-amd64
-          path: build-out
+          path: anzen-tesseract-macos-amd64.tar.gz
 
   create-release:
     needs: [build-linux, build-macos]
@@ -63,4 +65,4 @@ jobs:
         with:
           name: latest
           make_latest: true
-          files: anzen-tesseract-*.zip
+          files: anzen-tesseract-*/*.tar.gz
