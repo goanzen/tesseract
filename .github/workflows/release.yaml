@@ -6,7 +6,7 @@ on:
       - anzen-v*
   
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -26,3 +26,41 @@ jobs:
         with:
           name: anzen-tesseract-linux-amd64
           path: build-out
+
+  build-macos:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: brew install autoconf automake leptonica
+      - name: Build
+        run: |
+          ./autogen.sh
+          mkdir -p build build-out
+          cd build
+          ../configure --disable-openmp --prefix=$(realpath ../build-out)
+          make && make install
+          cd ..
+      - name: Save output
+        uses: actions/upload-artifact@v4
+        with:
+          name: anzen-tesseract-macos-amd64
+          path: build-out
+
+  create-release:
+    needs: [build-linux, build-macos]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: anzen-tesseract-*
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: latest
+          make_latest: true
+          files: anzen-tesseract-*.zip
