@@ -20,3 +20,9 @@ jobs:
           cd build
           ../configure --disable-openmp --prefix=$(realpath ../build-out)
           make && make install
+          cd ..
+      - name: Save output
+        uses: actions/upload-artifact@v4
+        with:
+          name: anzen-tesseract-linux-amd64
+          path: build-out
