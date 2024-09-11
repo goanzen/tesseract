@@ -8,7 +8,8 @@ cd build
 
 ../configure --disable-openmp --prefix=$(realpath ../build-out) --disable-doc
 
-make && make install
+make
+make install
 
 cd ..
 

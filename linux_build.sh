@@ -11,3 +11,6 @@ cd build
     --disable-openmp \
     --disable-doc \
     --prefix=$(realpath ../build-out)
+
+make
+make install
