@@ -16,11 +16,7 @@ jobs:
       - name: Build
         run: |
           ./autogen.sh
-          mkdir -p build build-out
-          cd build
-          ../configure --disable-openmp --prefix=$(realpath ../build-out)
-          make && make install
-          cd ..
+          ./linux_build.sh
       - name: Package output
         run: tar -czvf anzen-tesseract-linux-amd64.tar.gz -C build-out .
       - name: Save output
@@ -39,11 +35,7 @@ jobs:
       - name: Build
         run: |
           ./autogen.sh
-          mkdir -p build build-out
-          cd build
-          ../configure --disable-openmp --prefix=$(realpath ../build-out)
-          make && make install
-          cd ..
+          ./macos_build.sh
       - name: Package output
         run: tar -czvf anzen-tesseract-macos-amd64.tar.gz -C build-out .
       - name: Save output
