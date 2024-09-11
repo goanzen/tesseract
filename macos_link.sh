@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-BASE_DIR="./build-out2"
+BASE_DIR="./build-out"
 
 BIN_DIR=$(realpath "$BASE_DIR/bin")
 
