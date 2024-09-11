@@ -17,10 +17,17 @@ LIB_NAMES=$(ls $LIB_DIR/*.dylib | xargs -n 1 basename)
 EXTRA_RPATHS="@loader_path/../lib /opt/homebrew/lib /opt/homebrew/opt/libarchive/lib /usr/lib /System/Library/Frameworks/Accelerate.framework/Versions/Current"
 
 for LIB_NAME in $LIB_NAMES; do
+    if [[ -L "$LIB_DIR/$LIB_NAME" ]]; then
+        echo "Skipping link $LIB_DIR/$LIB_NAME"
+        continue
+    fi
+
     # Change install_name to use @rpath for the main library
     install_name_tool -id "@rpath/$LIB_NAME" "$LIB_DIR/$LIB_NAME"
     for rpath in $EXTRA_RPATHS; do
-        install_name_tool -add_rpath "$rpath" "$LIB_DIR/$LIB_NAME"
+        echo "Adding rpath: $rpath for lib/$LIB_NAME"
+
+        install_name_tool -add_rpath "$rpath" "$LIB_DIR/$LIB_NAME" || true # Some dylibs are links of one another
     done
 
     # Update paths for each dependency
@@ -35,6 +42,8 @@ done
 
 for BIN_NAME in $BIN_NAMES; do
     for rpath in $EXTRA_RPATHS; do
+        echo "Adding rpath: $rpath for bin/$BIN_NAME"
+
         install_name_tool -add_rpath "$rpath" "$BIN_DIR/$BIN_NAME"
     done
 
