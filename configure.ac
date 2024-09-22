@@ -133,11 +133,10 @@ AM_CONDITIONAL([HAVE_FMA], false)
 AM_CONDITIONAL([HAVE_SSE4_1], false)
 AM_CONDITIONAL([HAVE_NEON], false)
 
-if test "$enable_cpu_optimizations" = "yes"; then
-  case "${host_cpu}" in
+case "${host_cpu}" in
 
-    amd64|*86*)
-
+  amd64|*86*)
+    if test "$enable_cpu_optimizations" = "yes"; then
       AX_CHECK_COMPILE_FLAG([-mavx], [avx=true], [avx=false], [$WERROR])
       AM_CONDITIONAL([HAVE_AVX], ${avx})
       if $avx; then
@@ -167,18 +166,19 @@ if test "$enable_cpu_optimizations" = "yes"; then
       if $sse41; then
         AC_DEFINE([HAVE_SSE4_1], [1], [Enable SSE 4.1 instructions])
       fi
+    fi
+    ;;
 
-      ;;
-
-    aarch64*|arm64)
-
+  aarch64*|arm64)
+    if test "$enable_cpu_optimizations" = "yes" || test "$host_vendor" != "apple"; then
       # ARMv8 always has NEON and does not need special compiler flags.
       AM_CONDITIONAL([HAVE_NEON], true)
       AC_DEFINE([HAVE_NEON], [1], [Enable NEON instructions])
-      ;;
+    fi
+    ;;
 
-    arm*)
-
+  arm*)
+    if test "$enable_cpu_optimizations" = "yes"; then
       AX_CHECK_COMPILE_FLAG([-mfpu=neon], [neon=true], [neon=false], [$WERROR])
       AM_CONDITIONAL([HAVE_NEON], $neon)
       if $neon; then
@@ -187,15 +187,14 @@ if test "$enable_cpu_optimizations" = "yes"; then
         AC_SUBST([NEON_CXXFLAGS])
         check_for_neon=1
       fi
+    fi
+    ;;
 
-      ;;
+  *)
 
-    *)
+    AC_MSG_WARN([No compiler options for $host_cpu])
 
-      AC_MSG_WARN([No compiler options for $host_cpu])
-
-  esac
-fi
+esac
 
 # check whether feenableexcept is supported. some C libraries (e.g. uclibc) don't.
 AC_CHECK_FUNCS([feenableexcept])
