@@ -122,6 +122,10 @@ AX_CHECK_COMPILE_FLAG([-Werror=unused-command-line-argument], [WERROR=-Werror=un
 
 ## Checks for supported compiler options.
 
+AC_ARG_ENABLE([cpu-optimizations],
+  [AS_HELP_STRING([--disable-cpu-optimizations], [Disable CPU Optimizations])],
+  [enable_cpu_optimizations=$enableval], [enable_cpu_optimizations=yes])
+
 AM_CONDITIONAL([HAVE_AVX], false)
 AM_CONDITIONAL([HAVE_AVX2], false)
 AM_CONDITIONAL([HAVE_AVX512F], false)
@@ -129,67 +133,69 @@ AM_CONDITIONAL([HAVE_FMA], false)
 AM_CONDITIONAL([HAVE_SSE4_1], false)
 AM_CONDITIONAL([HAVE_NEON], false)
 
-case "${host_cpu}" in
+if test "$enable_cpu_optimizations" = "yes"; then
+  case "${host_cpu}" in
 
-  amd64|*86*)
+    amd64|*86*)
 
-    AX_CHECK_COMPILE_FLAG([-mavx], [avx=true], [avx=false], [$WERROR])
-    AM_CONDITIONAL([HAVE_AVX], ${avx})
-    if $avx; then
-      AC_DEFINE([HAVE_AVX], [1], [Enable AVX instructions])
-    fi
+      AX_CHECK_COMPILE_FLAG([-mavx], [avx=true], [avx=false], [$WERROR])
+      AM_CONDITIONAL([HAVE_AVX], ${avx})
+      if $avx; then
+        AC_DEFINE([HAVE_AVX], [1], [Enable AVX instructions])
+      fi
 
-    AX_CHECK_COMPILE_FLAG([-mavx2], [avx2=true], [avx2=false], [$WERROR])
-    AM_CONDITIONAL([HAVE_AVX2], $avx2)
-    if $avx2; then
-      AC_DEFINE([HAVE_AVX2], [1], [Enable AVX2 instructions])
-    fi
+      AX_CHECK_COMPILE_FLAG([-mavx2], [avx2=true], [avx2=false], [$WERROR])
+      AM_CONDITIONAL([HAVE_AVX2], $avx2)
+      if $avx2; then
+        AC_DEFINE([HAVE_AVX2], [1], [Enable AVX2 instructions])
+      fi
 
-    AX_CHECK_COMPILE_FLAG([-mavx512f], [avx512f=true], [avx512f=false], [$WERROR])
-    AM_CONDITIONAL([HAVE_AVX512F], $avx512f)
-    if $avx512f; then
-      AC_DEFINE([HAVE_AVX512F], [1], [Enable AVX512F instructions])
-    fi
+      AX_CHECK_COMPILE_FLAG([-mavx512f], [avx512f=true], [avx512f=false], [$WERROR])
+      AM_CONDITIONAL([HAVE_AVX512F], $avx512f)
+      if $avx512f; then
+        AC_DEFINE([HAVE_AVX512F], [1], [Enable AVX512F instructions])
+      fi
 
-    AX_CHECK_COMPILE_FLAG([-mfma], [fma=true], [fma=false], [$WERROR])
-    AM_CONDITIONAL([HAVE_FMA], $fma)
-    if $fma; then
-      AC_DEFINE([HAVE_FMA], [1], [Enable FMA instructions])
-    fi
+      AX_CHECK_COMPILE_FLAG([-mfma], [fma=true], [fma=false], [$WERROR])
+      AM_CONDITIONAL([HAVE_FMA], $fma)
+      if $fma; then
+        AC_DEFINE([HAVE_FMA], [1], [Enable FMA instructions])
+      fi
 
-    AX_CHECK_COMPILE_FLAG([-msse4.1], [sse41=true], [sse41=false], [$WERROR])
-    AM_CONDITIONAL([HAVE_SSE4_1], $sse41)
-    if $sse41; then
-      AC_DEFINE([HAVE_SSE4_1], [1], [Enable SSE 4.1 instructions])
-    fi
+      AX_CHECK_COMPILE_FLAG([-msse4.1], [sse41=true], [sse41=false], [$WERROR])
+      AM_CONDITIONAL([HAVE_SSE4_1], $sse41)
+      if $sse41; then
+        AC_DEFINE([HAVE_SSE4_1], [1], [Enable SSE 4.1 instructions])
+      fi
 
-    ;;
+      ;;
 
-  aarch64*|arm64)
+    aarch64*|arm64)
 
-    # ARMv8 always has NEON and does not need special compiler flags.
-    AM_CONDITIONAL([HAVE_NEON], true)
-    AC_DEFINE([HAVE_NEON], [1], [Enable NEON instructions])
-    ;;
-
-  arm*)
-
-    AX_CHECK_COMPILE_FLAG([-mfpu=neon], [neon=true], [neon=false], [$WERROR])
-    AM_CONDITIONAL([HAVE_NEON], $neon)
-    if $neon; then
+      # ARMv8 always has NEON and does not need special compiler flags.
+      AM_CONDITIONAL([HAVE_NEON], true)
       AC_DEFINE([HAVE_NEON], [1], [Enable NEON instructions])
-      NEON_CXXFLAGS="-mfpu=neon"
-      AC_SUBST([NEON_CXXFLAGS])
-      check_for_neon=1
-    fi
+      ;;
 
-    ;;
+    arm*)
 
-  *)
+      AX_CHECK_COMPILE_FLAG([-mfpu=neon], [neon=true], [neon=false], [$WERROR])
+      AM_CONDITIONAL([HAVE_NEON], $neon)
+      if $neon; then
+        AC_DEFINE([HAVE_NEON], [1], [Enable NEON instructions])
+        NEON_CXXFLAGS="-mfpu=neon"
+        AC_SUBST([NEON_CXXFLAGS])
+        check_for_neon=1
+      fi
 
-    AC_MSG_WARN([No compiler options for $host_cpu])
+      ;;
 
-esac
+    *)
+
+      AC_MSG_WARN([No compiler options for $host_cpu])
+
+  esac
+fi
 
 # check whether feenableexcept is supported. some C libraries (e.g. uclibc) don't.
 AC_CHECK_FUNCS([feenableexcept])
