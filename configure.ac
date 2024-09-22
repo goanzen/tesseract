@@ -170,11 +170,9 @@ case "${host_cpu}" in
     ;;
 
   aarch64*|arm64)
-    if test "$enable_cpu_optimizations" = "yes" || test "$host_vendor" != "apple"; then
-      # ARMv8 always has NEON and does not need special compiler flags.
-      AM_CONDITIONAL([HAVE_NEON], true)
-      AC_DEFINE([HAVE_NEON], [1], [Enable NEON instructions])
-    fi
+    # ARMv8 always has NEON and does not need special compiler flags.
+    AM_CONDITIONAL([HAVE_NEON], true)
+    AC_DEFINE([HAVE_NEON], [1], [Enable NEON instructions])
     ;;
 
   arm*)
