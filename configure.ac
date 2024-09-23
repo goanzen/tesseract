@@ -126,10 +126,10 @@ AC_ARG_ENABLE([cpu-optimizations],
   [AS_HELP_STRING([--disable-cpu-optimizations], [Disable CPU Optimizations])],
   [enable_cpu_optimizations=$enableval], [enable_cpu_optimizations=yes])
 
-AM_CONDITIONAL([ENABLE_CPU_OPTIMIZATIONS], $enable_cpu_optimizations)
 if test "$enable_cpu_optimizations" = "yes"; then
   AC_DEFINE([ENABLE_CPU_OPTIMIZATIONS], [1], [Enable CPU Optimizations])
 fi
+AM_CONDITIONAL([ENABLE_CPU_OPTIMIZATIONS], test ${enable_cpu_optimizations} = "yes")
 
 AM_CONDITIONAL([HAVE_AVX], false)
 AM_CONDITIONAL([HAVE_AVX2], false)
@@ -214,9 +214,9 @@ if test x$check_for_neon = x1; then
   fi
 fi
 
-AX_CHECK_COMPILE_FLAG([-fopenmp-simd], [openmp_simd=true], [openmp_simd=false], [$WERROR])
-
 if test "$enable_cpu_optimizations" = "yes"; then
+  AX_CHECK_COMPILE_FLAG([-fopenmp-simd], [openmp_simd=true], [openmp_simd=false], [$WERROR])
+
   AM_CONDITIONAL([OPENMP_SIMD], $openmp_simd)
 else
   AM_CONDITIONAL([OPENMP_SIMD], false)
