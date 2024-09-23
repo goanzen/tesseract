@@ -170,9 +170,11 @@ case "${host_cpu}" in
     ;;
 
   aarch64*|arm64)
-    # ARMv8 always has NEON and does not need special compiler flags.
-    AM_CONDITIONAL([HAVE_NEON], true)
-    AC_DEFINE([HAVE_NEON], [1], [Enable NEON instructions])
+    if test "$enable_cpu_optimizations" = "yes"; then
+      # ARMv8 always has NEON and does not need special compiler flags.
+      AM_CONDITIONAL([HAVE_NEON], true)
+      AC_DEFINE([HAVE_NEON], [1], [Enable NEON instructions])
+    fi
     ;;
 
   arm*)
@@ -310,10 +312,12 @@ m4_define([MY_CHECK_FRAMEWORK],
 
 case "${host_os}" in
   *darwin* | *-macos10*)
-    MY_CHECK_FRAMEWORK([Accelerate])
-    if test $my_cv_framework_Accelerate = yes; then
-      AM_CPPFLAGS="-DHAVE_FRAMEWORK_ACCELERATE $AM_CPPFLAGS"
-      AM_LDFLAGS="$AM_LDFLAGS -framework Accelerate"
+    if test "$enable_cpu_optimizations" = "yes"; then
+      MY_CHECK_FRAMEWORK([Accelerate])
+      if test $my_cv_framework_Accelerate = yes; then
+        AM_CPPFLAGS="-DHAVE_FRAMEWORK_ACCELERATE $AM_CPPFLAGS"
+        AM_LDFLAGS="$AM_LDFLAGS -framework Accelerate"
+      fi
     fi
     ;;
   *)
